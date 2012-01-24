@@ -24,11 +24,13 @@ class Class
     attr_reader :processor
     attr_reader :priority
     attr_reader :second_priority
+    attr_reader :group
     
-    def initialize(processor, sprior, prior = 0)
+    def initialize(processor, sprior, group, prior = 0)
       @processor = processor
       @priority = prior
       @second_priority = sprior
+      @group = group
     end
     
     def execute?(*args)
@@ -38,6 +40,16 @@ class Class
     def condition(&blk)
       @condition = blk
       self
+    end
+  end
+  
+  module ChainMethods
+    def disable_handler_group(groupname)
+      @disabled_handler_groups ||= Set.new
+      @disabled_handler_groups << groupname
+      yield
+    ensure
+      @disabled_handler_groups.delete groupname
     end
   end
   
@@ -51,8 +63,10 @@ class Class
     @method_handlers ||= Array.new
     @next_priority = (@next_priority || 0) + 1
     
-    mh = MethodHandler.new(blk, @next_priority, options[:priority] || 0)
+    mh = MethodHandler.new(blk, @next_priority, options[:group] || :default, options[:priority] || 0)
     @method_handlers << mh
+    
+    include ChainMethods
     
     @method_handlers.sort!{|x,y| 
       if x.priority == y.priority
@@ -63,7 +77,7 @@ class Class
     }
         
     define_method(mname) do |*x, &callblk|
-      self.class.method_handlers.reverse_each do |mhh|
+      self.class.method_handlers.reject{|mhh| (@disabled_handler_groups||[]).include? mhh.group }.reverse_each do |mhh|
         if mhh.execute?(*x)
           return mhh.processor.call(*x, &callblk)
         end
