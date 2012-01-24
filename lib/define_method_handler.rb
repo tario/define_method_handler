@@ -20,12 +20,13 @@ along with define_method_handler.  if not, see <http://www.gnu.org/licenses/>.
 =end
 require "set"
 class Class
-  
   class MethodHandler
     attr_reader :processor
+    attr_reader :priority
 
-    def initialize(processor)
+    def initialize(processor, prior = 0)
       @processor = processor
+      @priority = prior
     end
     
     def execute?(*args)
@@ -42,11 +43,14 @@ class Class
     @method_handlers
   end
   
-  def define_method_handler(mname, &blk)
+  def define_method_handler(mname, *options, &blk)
+    options = options.inject(&:merge) || {}
     
     @method_handlers ||= Array.new
-    mh = MethodHandler.new(blk)
+    mh = MethodHandler.new(blk, options[:priority] || 0)
     @method_handlers << mh
+    
+    @method_handlers.sort_by! &:priority
         
     define_method(mname) do |*x, &callblk|
       self.class.method_handlers.reverse_each do |mhh|
