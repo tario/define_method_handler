@@ -21,8 +21,8 @@ along with define_method_handler.  if not, see <http://www.gnu.org/licenses/>.
 require "set"
 class Class
   def define_method_handler(mname, &blk)
-    define_method(mname) do |*x|
-      blk.call(*x)
+    define_method(mname) do |*x, &callblk|
+      blk.call(*x, &callblk)
     end
   end
 end
