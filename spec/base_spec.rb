@@ -24,4 +24,19 @@ describe "define_method_handler" do
     CHAIN2.new.foo{99}.should be == 100
   end
   
+  it "two method handlers with the same name should respond depending on condition" do
+    class CHAIN3
+      define_method_handler(:foo) {|x|
+        1
+      }.condition{|x| x==3}
+
+      define_method_handler(:foo) {|x|
+        2
+      }.condition{|x| x==4}
+    end
+    
+    CHAIN3.new.foo(3).should be == 1
+    CHAIN3.new.foo(4).should be == 2
+  end
+  
 end
