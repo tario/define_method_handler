@@ -49,7 +49,7 @@ class Class
     @method_handlers << mh
         
     define_method(mname) do |*x, &callblk|
-      self.class.method_handlers.each do |mhh|
+      self.class.method_handlers.reverse_each do |mhh|
         if mhh.execute?(*x)
           return mhh.processor.call(*x, &callblk)
         end
