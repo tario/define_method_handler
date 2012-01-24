@@ -23,10 +23,12 @@ class Class
   class MethodHandler
     attr_reader :processor
     attr_reader :priority
-
-    def initialize(processor, prior = 0)
+    attr_reader :second_priority
+    
+    def initialize(processor, sprior, prior = 0)
       @processor = processor
       @priority = prior
+      @second_priority = sprior
     end
     
     def execute?(*args)
@@ -47,10 +49,18 @@ class Class
     options = options.inject(&:merge) || {}
     
     @method_handlers ||= Array.new
-    mh = MethodHandler.new(blk, options[:priority] || 0)
+    @next_priority = (@next_priority || 0) + 1
+    
+    mh = MethodHandler.new(blk, @next_priority, options[:priority] || 0)
     @method_handlers << mh
     
-    @method_handlers.sort_by! &:priority
+    @method_handlers.sort!{|x,y| 
+      if x.priority == y.priority
+        x.second_priority <=> y.second_priority
+      else
+        x.priority <=> y.priority
+      end
+    }
         
     define_method(mname) do |*x, &callblk|
       self.class.method_handlers.reverse_each do |mhh|
