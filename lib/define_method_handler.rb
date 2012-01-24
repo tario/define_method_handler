@@ -20,9 +20,44 @@ along with define_method_handler.  if not, see <http://www.gnu.org/licenses/>.
 =end
 require "set"
 class Class
-  def define_method_handler(mname, &blk)
-    define_method(mname) do |*x, &callblk|
-      blk.call(*x, &callblk)
+  
+  class MethodHandler
+    attr_reader :processor
+
+    def initialize(processor)
+      @processor = processor
     end
+    
+    def execute?(*args)
+      @condition ? @condition.call(*args) : true
+    end
+    
+    def condition(&blk)
+      @condition = blk
+      self
+    end
+  end
+  
+  def method_handlers
+    @method_handlers
+  end
+  
+  def define_method_handler(mname, &blk)
+    
+    @method_handlers ||= Array.new
+    mh = MethodHandler.new(blk)
+    @method_handlers << mh
+        
+    define_method(mname) do |*x, &callblk|
+      self.class.method_handlers.each do |mhh|
+        if mhh.execute?(*x)
+          return mhh.processor.call(*x, &callblk)
+        end
+      end
+      
+      nil
+    end
+    
+    mh
   end
 end
