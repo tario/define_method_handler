@@ -18,8 +18,11 @@ you should have received a copy of the gnu general public license
 along with define_method_handler.  if not, see <http://www.gnu.org/licenses/>.
 
 =end
-module FastRuby
-  class Chain
-    
+require "set"
+class Class
+  def define_method_handler(mname, &blk)
+    define_method(mname) do |*x|
+      blk.call(*x)
+    end
   end
 end
