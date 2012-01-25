@@ -60,4 +60,23 @@ describe "define_method_handler" do
       chain.foo.should be == 200
     end
   end
+
+  it "nested handler_scopes with repeated options should prioritize the more nested" do
+    class CHAIN4_4
+      handler_scope(:priority => -100) do
+        handler_scope(:priority => 100) do
+          define_method_handler(:foo) do
+            100
+          end
+        end
+      end
+
+      define_method_handler(:foo) do
+        200
+      end
+    end
+
+    chain = CHAIN4_4.new
+    chain.foo.should be == 100
+  end
 end
