@@ -54,4 +54,19 @@ describe "define_method_handler" do
       end
     end
   end
+  
+  it "one method handler defined with group only should NOT run inside disable_handler_group block after enable_handler_group block" do
+    class CHAIN2_1
+      define_method_handler(:foo, :group => :testgroup) {
+        10
+      }
+    end
+    
+    chain = CHAIN2_1.new
+    chain.disable_handler_group(:testgroup) do
+      chain.enable_handler_group(:testgroup) do
+      end
+      chain.foo.should be == nil
+    end
+  end
 end
