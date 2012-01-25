@@ -44,6 +44,10 @@ class Class
   end
   
   module ChainMethods
+    
+    def enable_handler_group(groupname)
+      @disabled_handler_groups.delete(groupname)
+    end
     def disable_handler_group(groupname)
       @disabled_handler_groups ||= Set.new
       @disabled_handler_groups << groupname
