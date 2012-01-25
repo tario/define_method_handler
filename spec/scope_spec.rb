@@ -26,4 +26,19 @@ describe "define_method_handler" do
     chain = CHAIN3_2.new
     chain.foo.should be == 92
   end
+  
+  it "should allow calling private instance methods from method handler" do
+    class CHAIN3_3
+      define_method_handler(:foo) do
+        helper
+      end
+
+private
+      def helper
+        92
+      end
+    end
+    chain = CHAIN3_3.new
+    chain.foo.should be == 92
+  end
 end
