@@ -67,8 +67,11 @@ class Class
   end
   
   def handler_scope(options)
+    old_options = @method_handler_options
     @method_handler_options = options
     yield
+  ensure
+    @method_handler_options = old_options
   end
   
   def define_method_handler(mname, *options, &blk)
