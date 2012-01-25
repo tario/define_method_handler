@@ -66,8 +66,14 @@ class Class
     @method_handlers
   end
   
+  def handler_scope(options)
+    @method_handler_options = options
+    yield
+  end
+  
   def define_method_handler(mname, *options, &blk)
     options = options.inject(&:merge) || {}
+    options.merge!(@method_handler_options) if @method_handler_options 
     
     @method_handlers ||= Array.new
     @next_priority = (@next_priority || 0) + 1
