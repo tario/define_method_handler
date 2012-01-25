@@ -48,6 +48,7 @@ class Class
       @disabled_handler_groups ||= Set.new
       group_included = @disabled_handler_groups.include? groupname
       @disabled_handler_groups.delete(groupname)
+      yield
     ensure
       @disabled_handler_groups << groupname if group_included
     end
