@@ -68,7 +68,7 @@ class Class
   
   def handler_scope(options)
     old_options = @method_handler_options
-    @method_handler_options = options
+    @method_handler_options = (@method_handler_options || {}).merge(options)
     yield
   ensure
     @method_handler_options = old_options
