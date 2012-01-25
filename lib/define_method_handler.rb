@@ -88,7 +88,18 @@ class Class
     define_method(mname) do |*x, &callblk|
       self.class.method_handlers.reject{|mhh| (@disabled_handler_groups||[]).include? mhh.group }.reverse_each do |mhh|
         if mhh.execute?(*x)
-          return mhh.processor.call(*x, &callblk)
+          tmp_method = 'tmpmethod#{rand(10000000000000)}'
+          
+          begin
+            self.class.class_eval do 
+              define_method(tmp_method, &mhh.processor)
+            end
+            return method(tmp_method).call(*x, &callblk)
+          ensure
+            self.class.class_eval do
+              remove_method(tmp_method)
+            end 
+          end
         end
       end
       
