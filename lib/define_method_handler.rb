@@ -40,8 +40,23 @@ class Class
       @group = group
     end
     
-    def execute?(*args)
-      @condition ? @condition.call(*args) : true
+    def execute?(chain, *args)
+      if @condition
+        tmp_method = "tmpmethod#{rand(1000000)}#{Time.now.to_i}"
+        begin
+          local_condition = @condition
+          chain.class.class_eval do 
+            define_method(tmp_method, &local_condition)
+          end
+          chain.send(tmp_method,*args)
+        ensure
+          chain.class.class_eval do
+            remove_method(tmp_method)
+          end
+        end
+      else
+        true
+      end
     end
     
     def condition(&blk)
@@ -132,7 +147,7 @@ class Class
             (@disabled_handler_groups||[]).include? gr
           } > 0 }.reverse_each do |mhh|
 
-        if mhh.execute?(*x)
+        if mhh.execute?(self,*x)
           tmp_method = "tmpmethod#{rand(1000000)}#{Time.now.to_i}"
           
           begin
