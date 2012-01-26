@@ -1,4 +1,6 @@
-0.0.4	Allow using of normal methods as method handlers define_method_handler(:foo, :method => :foo_impl)
+0.0.4   Allow referencing self from condition block	
+
+    Allow using of normal methods as method handlers define_method_handler(:foo, :method => :foo_impl)
 
 		method handlers with multiple groups	
 
