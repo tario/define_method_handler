@@ -41,4 +41,18 @@ private
     chain = CHAIN3_3.new
     chain.foo.should be == 92
   end
+  
+  
+  it "should allow referencing self from condition" do
+    class CHAIN3_4
+      def bar
+        100
+      end
+      
+      define_method_handler(:foo) {92}.condition{self.bar == 100}
+    end
+    chain = CHAIN3_4.new
+    chain.foo.should be == 92
+  end
+  
 end
