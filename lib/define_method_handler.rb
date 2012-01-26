@@ -55,7 +55,7 @@ class Class
       group_included = false
       if block_given?
         begin
-          group_included = @disabled_handler_groups.include? groupname
+          group_included = (@disabled_handler_groups||{}).include? groupname
           enable_handler_group(groupname)
           yield
         ensure
