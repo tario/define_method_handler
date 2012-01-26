@@ -61,11 +61,17 @@ class Class
     end
     
     def disable_handler_group(groupname)
-      @disabled_handler_groups ||= Set.new
-      @disabled_handler_groups << groupname
-      yield
-    ensure
-      @disabled_handler_groups.delete groupname
+      if block_given?
+        begin
+          disable_handler_group(groupname)
+          yield
+        ensure
+          @disabled_handler_groups.delete groupname
+        end
+      else
+        @disabled_handler_groups ||= Set.new
+        @disabled_handler_groups << groupname
+      end
     end
   end
   
