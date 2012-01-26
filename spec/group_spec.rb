@@ -87,5 +87,17 @@ describe "define_method_handler" do
     
     ret.should be == 10
   end
-    
+
+
+  it "one method handler defined with group should not run after disable_handler_group" do
+    class CHAIN2_1
+      define_method_handler(:foo, :group => :testgroup) {
+        10
+      }
+    end
+        
+    chain = CHAIN2_1.new
+    chain.disable_handler_group(:testgroup)
+    chain.foo.should be == nil
+  end   
 end
