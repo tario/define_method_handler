@@ -38,5 +38,16 @@ describe "define_method_handler" do
     CHAIN3.new.foo(3).should be == 1
     CHAIN3.new.foo(4).should be == 2
   end
+
+  it "should accept recursive methods" do
+    class CHAIN4
+      define_method_handler(:fact) do |n|
+        n>1 ? fact(n-1)*n : 1
+      end
+    end
+
+    chain4 = CHAIN4.new
+    chain4.fact(5).should be == 120
+  end
   
 end
