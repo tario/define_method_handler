@@ -97,7 +97,7 @@ class Class
     define_method(mname) do |*x, &callblk|
       self.class.method_handlers.reject{|mhh| (@disabled_handler_groups||[]).include? mhh.group }.reverse_each do |mhh|
         if mhh.execute?(*x)
-          tmp_method = 'tmpmethod#{rand(10000000000000)}'
+          tmp_method = "tmpmethod#{rand(1000000)}#{Time.now.to_i}"
           
           begin
             self.class.class_eval do 
