@@ -1,3 +1,9 @@
+0.0.4	Allow using of normal methods as method handlers define_method_handler(:foo, :method => :foo_impl)
+
+		method handlers with multiple groups	
+
+		enable_handler_group and disable_handler_group without blocks 
+
 0.0.3   Fixed bug on naming for anonymous methods defined on the fly
 
 0.0.2   Added missing lib dir to gem
