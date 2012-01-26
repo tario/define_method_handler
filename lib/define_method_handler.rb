@@ -51,34 +51,40 @@ class Class
   end
   
   module ChainMethods
+    def disabled_handler_groups
+      @disabled_handler_groups ||= Set.new
+    end
+    
+    def disabled_handler_groups=(a)
+      @disabled_handler_groups=a
+    end
+    
     def enable_handler_group(groupname)
       group_included = false
       if block_given?
         begin
-          group_included = (@disabled_handler_groups||{}).include? groupname
+          group_included = (disabled_handler_groups||{}).include? groupname
           enable_handler_group(groupname)
           yield
         ensure
-          @disabled_handler_groups << groupname if group_included
+          disabled_handler_groups << groupname if group_included
         end
       else
-        @disabled_handler_groups ||= Set.new
-        @disabled_handler_groups.delete(groupname)
+        disabled_handler_groups.delete(groupname)
       end
     end
     
     def disable_handler_group(groupname)
       if block_given?
-        old_groups = @disabled_handler_groups && @disabled_handler_groups.dup
+        old_groups = disabled_handler_groups.dup
         begin
           disable_handler_group(groupname)
           yield
         ensure
-          @disabled_handler_groups = old_groups
+          self.disabled_handler_groups = old_groups
         end
       else
-        @disabled_handler_groups ||= Set.new
-        @disabled_handler_groups << groupname
+        disabled_handler_groups << groupname
       end
     end
   end
