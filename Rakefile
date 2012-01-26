@@ -7,7 +7,7 @@ require "rspec/core/rake_task"
 
 spec = Gem::Specification.new do |s|
   s.name = 'define_method_handler'
-  s.version = '0.0.1'
+  s.version = '0.0.2'
   s.author = 'Dario Seminara'
   s.email = 'robertodarioseminara@gmail.com'
   s.platform = Gem::Platform::RUBY
