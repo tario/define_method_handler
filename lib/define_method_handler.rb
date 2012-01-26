@@ -62,12 +62,12 @@ class Class
     def enable_handler_group(groupname)
       group_included = false
       if block_given?
+        old_groups = disabled_handler_groups.dup
         begin
-          group_included = (disabled_handler_groups||{}).include? groupname
           enable_handler_group(groupname)
           yield
         ensure
-          disabled_handler_groups << groupname if group_included
+          self.disabled_handler_groups = old_groups
         end
       else
         disabled_handler_groups.delete(groupname)
