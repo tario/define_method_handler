@@ -49,5 +49,18 @@ describe "define_method_handler" do
     chain4 = CHAIN4.new
     chain4.fact(5).should be == 120
   end
+
+  it "should accept normal methods as handlers" do
+    class CHAIN5
+      define_method_handler(:foo, :method => :foo_impl)
+      
+      def foo_impl
+        100
+      end
+    end
+
+    chain5 = CHAIN5.new
+    chain5.foo.should be == 100
+  end 
   
 end
