@@ -19,6 +19,12 @@ along with define_method_handler.  if not, see <http://www.gnu.org/licenses/>.
 
 =end
 require "set"
+class Symbol
+  def to_a
+    [self]
+  end
+end
+
 class Class
   class MethodHandler
     attr_reader :processor
@@ -67,8 +73,11 @@ class Class
   end
   
   def handler_scope(options)
-    old_options = @method_handler_options
+    old_options = @method_handler_options||{}
+    old_group = old_options[:group]
     @method_handler_options = (@method_handler_options || {}).merge(options)
+    @method_handler_options[:group] = (@method_handler_options[:group].to_a + old_group.to_a).uniq
+
     yield
   ensure
     @method_handler_options = old_options
@@ -81,7 +90,7 @@ class Class
     @method_handlers ||= Array.new
     @next_priority = (@next_priority || 0) + 1
     
-    mh = MethodHandler.new(blk, @next_priority, options[:group] || :default, options[:priority] || 0)
+    mh = MethodHandler.new(blk, @next_priority, (options[:group].to_a + :default.to_a), options[:priority] || 0)
     @method_handlers << mh
     
     include ChainMethods
@@ -89,13 +98,17 @@ class Class
     @method_handlers.sort!{|x,y| 
       if x.priority == y.priority
         x.second_priority <=> y.second_priority
-      else
+       else
         x.priority <=> y.priority
       end
     }
         
     define_method(mname) do |*x, &callblk|
-      self.class.method_handlers.reject{|mhh| (@disabled_handler_groups||[]).include? mhh.group }.reverse_each do |mhh|
+      self.class.method_handlers.reject{|mhh| 
+          mhh.group.count { |gr|
+            (@disabled_handler_groups||[]).include? gr
+          } > 0 }.reverse_each do |mhh|
+
         if mhh.execute?(*x)
           tmp_method = "tmpmethod#{rand(1000000)}#{Time.now.to_i}"
           
