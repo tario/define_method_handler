@@ -31,6 +31,7 @@ class Class
     attr_reader :priority
     attr_reader :second_priority
     attr_reader :group
+    attr_accessor :method_name
     
     def initialize(processor, sprior, group, prior = 0)
       @processor = processor
@@ -91,6 +92,8 @@ class Class
     @next_priority = (@next_priority || 0) + 1
     
     mh = MethodHandler.new(blk, @next_priority, (options[:group].to_a + :default.to_a), options[:priority] || 0)
+    mh.method_name = options[:method]
+    
     @method_handlers << mh
     
     include ChainMethods
@@ -113,13 +116,19 @@ class Class
           tmp_method = "tmpmethod#{rand(1000000)}#{Time.now.to_i}"
           
           begin
-            self.class.class_eval do 
-              define_method(tmp_method, &mhh.processor)
+            if mhh.method_name
+              return send(mhh.method_name, *x, &callblk)
+            else
+              self.class.class_eval do 
+                define_method(tmp_method, &mhh.processor)
+              end
+              return method(tmp_method).call(*x, &callblk)
             end
-            return method(tmp_method).call(*x, &callblk)
           ensure
-            self.class.class_eval do
-              remove_method(tmp_method)
+            unless mhh.method_name
+              self.class.class_eval do
+                remove_method(tmp_method)
+              end
             end 
           end
         end
