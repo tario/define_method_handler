@@ -69,11 +69,12 @@ class Class
     
     def disable_handler_group(groupname)
       if block_given?
+        old_groups = @disabled_handler_groups && @disabled_handler_groups.dup
         begin
           disable_handler_group(groupname)
           yield
         ensure
-          @disabled_handler_groups.delete groupname
+          @disabled_handler_groups = old_groups
         end
       else
         @disabled_handler_groups ||= Set.new
