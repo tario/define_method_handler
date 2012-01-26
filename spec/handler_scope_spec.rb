@@ -79,4 +79,31 @@ describe "define_method_handler" do
     chain = CHAIN4_4.new
     chain.foo.should be == 100
   end
+  
+
+  it "nested handler_scopes with groups should define multiple groups for handler" do
+    class CHAIN4_5
+      handler_scope(:group => :a) do
+         handler_scope(:group => :b) do
+             define_method_handler(:foo) do
+                   99
+             end
+         end
+      end
+    end
+  
+    chain = CHAIN4_5.new
+    chain.disable_handler_group(:a) do
+       chain.foo.should be == nil # nil
+    end
+  
+    chain.disable_handler_group(:b) do
+       chain.foo.should be == nil # nil
+    end
+  
+    chain.disable_handler_group(:default) do
+       chain.foo.should be == nil # nil
+    end  
+  end
+  
 end
