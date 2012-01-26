@@ -52,12 +52,19 @@ class Class
   
   module ChainMethods
     def enable_handler_group(groupname)
-      @disabled_handler_groups ||= Set.new
-      group_included = @disabled_handler_groups.include? groupname
-      @disabled_handler_groups.delete(groupname)
-      yield
-    ensure
-      @disabled_handler_groups << groupname if group_included
+      group_included = false
+      if block_given?
+        begin
+          group_included = @disabled_handler_groups.include? groupname
+          enable_handler_group(groupname)
+          yield
+        ensure
+          @disabled_handler_groups << groupname if group_included
+        end
+      else
+        @disabled_handler_groups ||= Set.new
+        @disabled_handler_groups.delete(groupname)
+      end
     end
     
     def disable_handler_group(groupname)
