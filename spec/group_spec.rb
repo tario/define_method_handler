@@ -132,5 +132,20 @@ describe "define_method_handler" do
     end
     
     ret.should be == nil
-  end   
+  end
+  
+  it "one method handler defined with group should enabled after enable_handler_group block is closed" do
+    class CHAIN2_1
+      define_method_handler(:foo, :group => :testgroup) {
+        10
+      }
+    end
+        
+    chain = CHAIN2_1.new
+
+    chain.enable_handler_group(:testgroup) do
+    end
+    
+    chain.foo.should be == 10
+  end
 end
