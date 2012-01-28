@@ -67,39 +67,37 @@ class Class
   
   module ChainMethods
     def disabled_handler_groups
-      @disabled_handler_groups ||= Set.new
+      @disabled_handler_groups ||= Hash.new
     end
     
-    def disabled_handler_groups=(a)
-      @disabled_handler_groups=a
-    end
-    
-    def enable_handler_group(groupname)
+    def enable_handler_group(groupname, mname = self.class.method_handlers.keys.first)
       group_included = false
       if block_given?
-        old_groups = disabled_handler_groups.dup
+        old_groups = (disabled_handler_groups[mname]||Set.new).dup
         begin
-          enable_handler_group(groupname)
+          enable_handler_group(groupname,mname)
           yield
         ensure
-          self.disabled_handler_groups = old_groups
+          self.disabled_handler_groups[mname] = old_groups
         end
       else
-        disabled_handler_groups.delete(groupname)
+        disabled_handler_groups[mname] ||= Set.new
+        disabled_handler_groups[mname].delete(groupname)
       end
     end
     
-    def disable_handler_group(groupname)
+    def disable_handler_group(groupname, mname = self.class.method_handlers.keys.first)
       if block_given?
-        old_groups = disabled_handler_groups.dup
+        old_groups = (disabled_handler_groups[mname]||Set.new).dup
         begin
-          disable_handler_group(groupname)
+          disable_handler_group(groupname,mname)
           yield
         ensure
-          self.disabled_handler_groups = old_groups
+          self.disabled_handler_groups[mname] = old_groups
         end
       else
-        disabled_handler_groups << groupname
+        disabled_handler_groups[mname] ||= Set.new
+        disabled_handler_groups[mname] << groupname
       end
     end
   end
@@ -123,17 +121,18 @@ class Class
     options = options.inject(&:merge) || {}
     options.merge!(@method_handler_options) if @method_handler_options 
     
-    @method_handlers ||= Array.new
+    @method_handlers ||= Hash.new
+    @method_handlers[mname] ||= Array.new
     @next_priority = (@next_priority || 0) + 1
     
     mh = MethodHandler.new(blk, @next_priority, (options[:group].to_a + :default.to_a), options[:priority] || 0)
     mh.method_name = options[:method]
     
-    @method_handlers << mh
+    @method_handlers[mname] << mh
     
     include ChainMethods
     
-    @method_handlers.sort!{|x,y| 
+    @method_handlers[mname].sort!{|x,y| 
       if x.priority == y.priority
         x.second_priority <=> y.second_priority
        else
@@ -142,9 +141,12 @@ class Class
     }
         
     define_method(mname) do |*x, &callblk|
-      self.class.method_handlers.reject{|mhh| 
+      self.class.method_handlers[mname].reject{|mhh| 
           mhh.group.count { |gr|
-            (@disabled_handler_groups||[]).include? gr
+            @disabled_handler_groups ||= Hash.new
+            @disabled_handler_groups[mname]||= Set.new
+            
+            @disabled_handler_groups[mname].include? gr
           } > 0 }.reverse_each do |mhh|
 
         if mhh.execute?(self,*x)
