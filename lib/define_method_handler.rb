@@ -50,8 +50,11 @@ class Class
           end
           chain.send(tmp_method,*args)
         ensure
-          chain.class.class_eval do
-            remove_method(tmp_method)
+          begin
+            chain.class.class_eval do
+              remove_method(tmp_method)
+            end
+          rescue NameError
           end
         end
       else
@@ -163,8 +166,11 @@ class Class
             end
           ensure
             unless mhh.method_name
-              self.class.class_eval do
-                remove_method(tmp_method)
+              begin
+                self.class.class_eval do
+                  remove_method(tmp_method)
+                end
+              rescue NameError
               end
             end 
           end
