@@ -144,6 +144,7 @@ class Class
     }
         
     define_method(mname) do |*x, &callblk|
+      retval = nil
       self.class.method_handlers[mname].reject{|mhh| 
           mhh.group.count { |gr|
             @disabled_handler_groups ||= Hash.new
@@ -157,12 +158,12 @@ class Class
           
           begin
             if mhh.method_name
-              return send(mhh.method_name, *x, &callblk)
+              retval = send(mhh.method_name, *x, &callblk)
             else
               self.class.class_eval do 
                 define_method(tmp_method, &mhh.processor)
               end
-              return method(tmp_method).call(*x, &callblk)
+              retval = method(tmp_method).call(*x, &callblk)
             end
           ensure
             unless mhh.method_name
@@ -177,7 +178,7 @@ class Class
         end
       end
       
-      nil
+      retval
     end
     
     mh
