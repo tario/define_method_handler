@@ -159,11 +159,13 @@ class Class
           begin
             if mhh.method_name
               retval = send(mhh.method_name, *x, &callblk)
+              break
             else
               self.class.class_eval do 
                 define_method(tmp_method, &mhh.processor)
               end
               retval = method(tmp_method).call(*x, &callblk)
+              break
             end
           ensure
             unless mhh.method_name
