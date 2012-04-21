@@ -1,3 +1,5 @@
+0.0.6   Making tests pass for ruby 1.8
+
 0.0.5   added error handling on remove_method
 
         refactor: changed state variables of chain to changes to allow keeping state of multiple methods by nam
